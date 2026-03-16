@@ -11,8 +11,8 @@ export const initializeDatabase = async () => {
   await migrateDatabase()
 
   const alwaysSeed = bool(process.env.DB_SEED_ON_START, false)
-  const seedInDev = bool(process.env.DB_SEED_IN_DEV, true)
-  const shouldConsiderSeed = alwaysSeed || (process.env.NODE_ENV !== 'production' && seedInDev)
+  const autoSeedIfEmpty = bool(process.env.DB_AUTO_SEED_IF_EMPTY, true)
+  const shouldConsiderSeed = alwaysSeed || autoSeedIfEmpty
 
   if (!shouldConsiderSeed) {
     console.log('⏭️  Skipping seed on startup')
@@ -23,6 +23,7 @@ export const initializeDatabase = async () => {
   const vendorCount = rows?.[0]?.count ?? 0
 
   if (alwaysSeed || vendorCount === 0) {
+    console.log(alwaysSeed ? '🌱 Forcing seed (DB_SEED_ON_START=true)' : '🌱 Empty vendors table detected, seeding...')
     await seedDatabase()
   } else {
     console.log(`⏭️  Seed skipped: ${vendorCount} vendors already present`)
